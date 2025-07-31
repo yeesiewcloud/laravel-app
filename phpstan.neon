@@ -1,0 +1,12 @@
+includes:
+  - ./vendor/nunomaduro/larastan/extension.neon
+
+parameters:
+  level: 5
+  paths:
+    - app
+    - routes
+  ignoreErrors:
+
+  # Optional: keep if models might not have phpdoc yet
+  checkMissingCallableSignature: false
