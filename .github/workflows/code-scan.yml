@@ -1,0 +1,86 @@
+name: Code Scanning - PHP + JS
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  # schedule:
+  #   - cron: '0 3 * * 0' # Weekly scan at 3 AM on Sunday
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  codeql-scan:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      matrix:
+        # language: [php, javascript]
+        language: [php]
+
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+
+  phpstan:
+    name: PHPStan Laravel (Static Analysis)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, dom, fileinfo, pdo, pdo_mysql
+        tools: composer
+
+    - name: Install PHP dependencies
+      run: composer install --prefer-dist --no-progress
+
+    - name: Install PHPStan + Larastan
+      run: composer require --dev phpstan/phpstan nunomaduro/larastan
+
+    - name: Run PHPStan
+      run: ./vendor/bin/phpstan analyse app --level=5
+
+  # eslint:
+  #   name: ESLint for JS/TS
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v3
+
+  #   - name: Setup Node.js
+  #     uses: actions/setup-node@v3
+  #     with:
+  #       node-version: '18'
+
+  #   - name: Install dependencies
+  #     run: npm install
+
+  #   - name: Run ESLint
+  #     run: npx eslint . --ext .js,.ts,.jsx,.tsx

@@ -34,4 +34,16 @@ class PostController extends Controller
         $post->delete();
         return response()->json(null, 204);
     }
+
+    public function getUser(Request $request)
+    {
+                // Vulnerable: directly injecting user input into SQL query
+        $id = $request->input('id');
+        $user = DB::select("SELECT * FROM posts WHERE id = $id"); // ⚠ SQL Injection
+
+        // Unused variable (for static analysis warning)
+        $foo = "bar";
+
+        return response()->json($user);
+    }
 }
