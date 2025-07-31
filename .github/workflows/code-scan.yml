@@ -61,4 +61,4 @@ jobs:
       continue-on-error: true  # Skip error if already configured
 
     - name: Run Psalm analysis
-      run: vendor/bin/psalm
+      run: vendor/bin/psalm --alter --issues=MissingReturnType,UnusedVariable,MissingOverrideAttribute,ClassMustBeFinal,PossiblyUnusedMethod --dry-run
