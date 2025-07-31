@@ -64,7 +64,10 @@ jobs:
       # run: vendor/bin/psalm --alter --issues=MissingReturnType,UnusedVariable,MissingOverrideAttribute,ClassMustBeFinal,PossiblyUnusedMethod --dry-run --output-format=github > psalm.sarif || true
       run: vendor/bin/psalm --output-format=github > psalm.sarif || echo "Psalm failed, continuing anyway"
 
-    - name: Upload SARIF report
+    - name: Psalm Security Scan
+      uses: psalm/psalm-github-security-scan@f3e6fd9432bc3e44aec078572677ce9d2ef9c287
+
+    - name: Upload Security Analysis results to GitHub
       uses: github/codeql-action/upload-sarif@v3
       with:
-        sarif_file: psalm.sarif
+        sarif_file: results.sarif
