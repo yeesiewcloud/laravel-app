@@ -61,7 +61,7 @@ jobs:
       continue-on-error: true  # Skip error if already configured
 
     - name: Run Psalm analysis
-      run: vendor/bin/psalm --alter --issues=MissingReturnType,UnusedVariable,MissingOverrideAttribute,ClassMustBeFinal,PossiblyUnusedMethod --dry-run > psalm.sarif || true
+      run: vendor/bin/psalm --alter --issues=MissingReturnType,UnusedVariable,MissingOverrideAttribute,ClassMustBeFinal,PossiblyUnusedMethod --dry-run --output-format=github > psalm.sarif || true
 
     - name: Upload SARIF report
       uses: github/codeql-action/upload-sarif@v3
