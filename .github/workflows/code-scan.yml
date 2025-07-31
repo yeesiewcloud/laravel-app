@@ -5,43 +5,12 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-  # schedule:
-  #   - cron: '0 3 * * 0' # Weekly scan at 3 AM on Sunday
 
 permissions:
   contents: read
   security-events: write
 
 jobs:
-  codeql-scan:
-    name: CodeQL Analysis
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-
-    strategy:
-      matrix:
-        # language: [php, javascript]
-        language: [php]
-
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: ${{ matrix.language }}
-
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v3
-
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
-
   phpstan:
     name: PHPStan Laravel (Static Analysis)
     runs-on: ubuntu-latest
@@ -66,21 +35,30 @@ jobs:
     - name: Run PHPStan
       run: ./vendor/bin/phpstan analyse app --level=5
 
-  # eslint:
-  #   name: ESLint for JS/TS
-  #   runs-on: ubuntu-latest
+  psalm:
+    name: Run Psalm
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v3
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-  #   - name: Setup Node.js
-  #     uses: actions/setup-node@v3
-  #     with:
-  #       node-version: '18'
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, dom, pdo, pdo_mysql
+        tools: composer
 
-  #   - name: Install dependencies
-  #     run: npm install
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress
 
-  #   - name: Run ESLint
-  #     run: npx eslint . --ext .js,.ts,.jsx,.tsx
+    - name: Install Psalm
+      run: composer require --dev vimeo/psalm
+
+    - name: Initialize Psalm (if needed)
+      run: vendor/bin/psalm --init
+      continue-on-error: true  # Skip error if already configured
+
+    - name: Run Psalm analysis
+      run: vendor/bin/psalm
