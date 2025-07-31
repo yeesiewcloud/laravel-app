@@ -2,9 +2,9 @@ name: Code Scanning - PHP + JS
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
   # schedule:
   #   - cron: '0 3 * * 0' # Weekly scan at 3 AM on Sunday
 
