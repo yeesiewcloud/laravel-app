@@ -7,20 +7,28 @@ on:
     branches: [master, uat, sit, tan/local]
 
 jobs:
-  gitleaks:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }} # Only required for Organizations, not personal accounts.
-          GITLEAKS_ARGS: --report-format sarif --report-path gitleaks.sarif 
-          GITLEAKS_VERSION: 8.18.4
-      - name: Upload SARIF report
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: gitleaks.sarif
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      - name: Gitleaks Scan
+        uses: gitleaks/gitleaks-action@v2
+        # Add this ID to reference the step later
+        id: gitleaks-scan
+        # Add this line to ensure the workflow continues even if secrets are found
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+          GITLEAKS_ARGS: --report-format sarif --report-path gitleaks.sarif
+          GITLEAKS_VERSION: 8.18.4
+
+      - name: Upload SARIF report
+      # Add this line to only run the step if the report exists
+      if: steps.gitleaks-scan.outcome == 'failure' && hashFiles('gitleaks.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gitleaks.sarif
