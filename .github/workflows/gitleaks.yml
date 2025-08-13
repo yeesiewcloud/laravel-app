@@ -1,45 +1,31 @@
-name: Secret Scan (Gitleaks)
+name: Gitleaks Local Test
 
 on:
+  workflow_dispatch:  # so act can run it
   push:
     branches: [master]
-  pull_request:
-    branches: [master, uat, sit, tan/local]
 
 jobs:
   gitleaks:
     runs-on: ubuntu-latest
     steps:
-      # Checkout full history so Gitleaks can scan all commits
-      - name: Checkout code
+      - name: Checkout full history
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # Run Gitleaks scan
       - name: Run Gitleaks
-        id: gitleaks
         uses: gitleaks/gitleaks-action@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # If you have a license for org usage:
-          # GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
           GITLEAKS_ARGS: --report-format sarif --report-path gitleaks.sarif --verbose
           GITLEAKS_VERSION: 8.18.4
 
-      # Debug: show report file
-      - name: Show SARIF file
+      - name: Verify SARIF file
         run: |
           if [ -f gitleaks.sarif ]; then
-            echo "SARIF file generated:"
+            echo "✅ SARIF file generated"
             ls -lh gitleaks.sarif
           else
-            echo "❌ SARIF file not found!"
+            echo "❌ SARIF file not found"
             exit 1
           fi
-
-      # Upload report to GitHub Security tab
-      - name: Upload SARIF report
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: gitleaks.sarif
