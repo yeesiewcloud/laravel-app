@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches:
-      - main # Or your default branch
+      - master # Or your default branch
   workflow_dispatch: # Allows manual triggering
 #   schedule:
 #     - cron: '0 4 * * *' # Example: Runs daily at 4 AM UTC
