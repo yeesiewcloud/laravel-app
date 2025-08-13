@@ -10,15 +10,36 @@ jobs:
   gitleaks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # Checkout full history so Gitleaks can scan all commits
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
+
+      # Run Gitleaks scan
+      - name: Run Gitleaks
+        id: gitleaks
+        uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_ARGS: --report-format=sarif --report-path=gitleaks.sarif --verbose
+          # If you have a license for org usage:
+          # GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+          GITLEAKS_ARGS: --report-format sarif --report-path gitleaks.sarif --verbose
           GITLEAKS_VERSION: 8.18.4
+
+      # Debug: show report file
+      - name: Show SARIF file
+        run: |
+          if [ -f gitleaks.sarif ]; then
+            echo "SARIF file generated:"
+            ls -lh gitleaks.sarif
+          else
+            echo "❌ SARIF file not found!"
+            exit 1
+          fi
+
+      # Upload report to GitHub Security tab
       - name: Upload SARIF report
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: ./gitleaks.sarif
+          sarif_file: gitleaks.sarif
