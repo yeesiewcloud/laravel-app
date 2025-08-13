@@ -2,7 +2,7 @@ name: Secret Scan (Gitleaks)
 
 on:
   pull_request:
-    branches: [main, uat, sit, tan/local]
+    branches: [master, uat, sit, tan/local]
 
 jobs:
   gitleaks:
