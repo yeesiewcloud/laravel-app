@@ -1,31 +1,45 @@
-name: Gitleaks Local Test
+name: GitLeaks Security Scan
 
 on:
-  workflow_dispatch:  # so act can run it
   push:
-    branches: [master]
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+#   schedule:
+#     # Run daily at 2 AM UTC
+#     - cron: '0 2 * * *'
 
 jobs:
   gitleaks:
+    name: Secret Detection
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout full history
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Run Gitleaks
+          fetch-depth: 0  # Fetch full history for complete scan
+          
+      - name: Run GitLeaks
         uses: gitleaks/gitleaks-action@v2
         env:
-          GITLEAKS_ARGS: --report-format sarif --report-path gitleaks.sarif --verbose
-          GITLEAKS_VERSION: 8.18.4
-
-      - name: Verify SARIF file
-        run: |
-          if [ -f gitleaks.sarif ]; then
-            echo "✅ SARIF file generated"
-            ls -lh gitleaks.sarif
-          else
-            echo "❌ SARIF file not found"
-            exit 1
-          fi
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #   GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }} # Optional: for GitLeaks Pro
+        with:
+          # Scan the entire repository
+          args: --verbose --report-format=sarif --report-path=gitleaks.sarif
+          
+      - name: Upload SARIF results
+        if: always()  # Upload results even if GitLeaks finds issues
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gitleaks.sarif
+          category: gitleaks
+          
+      - name: Upload GitLeaks report as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks.sarif
+          retention-days: 30
