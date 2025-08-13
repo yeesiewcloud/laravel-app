@@ -2,9 +2,9 @@ name: Code Scanning - PHP + JS
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -63,7 +63,7 @@ jobs:
     - name: Run Psalm analysis
       # run: vendor/bin/psalm --alter --issues=MissingReturnType,UnusedVariable,MissingOverrideAttribute,ClassMustBeFinal,PossiblyUnusedMethod --dry-run --output-format=github > psalm.sarif || true
       run: vendor/bin/psalm --output-format=github > psalm.sarif || echo "Psalm failed, continuing anyway"
-
+        
     - name: Psalm Security Scan
       uses: psalm/psalm-github-security-scan@f3e6fd9432bc3e44aec078572677ce9d2ef9c287
 
