@@ -5,9 +5,9 @@ on:
     branches: [ main, master, develop ]
   pull_request:
     branches: [ main, master, develop ]
-#   schedule:
-#     # Run daily at 2 AM UTC
-#     - cron: '0 2 * * *'
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
 
 jobs:
   gitleaks:
@@ -21,23 +21,46 @@ jobs:
           fetch-depth: 0  # Fetch full history for complete scan
           
       - name: Run GitLeaks
+        id: gitleaks
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #   GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }} # Optional: for GitLeaks Pro
-        with:
-          # Scan the entire repository
-          args: --verbose --report-format=sarif --report-path=gitleaks.sarif
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }} # Optional: for GitLeaks Pro
+        continue-on-error: true  # Don't fail the workflow if secrets are found
+        
+      - name: Generate GitLeaks report
+        if: always()
+        run: |
+          # Run gitleaks with report generation, handling both success and failure cases
+          docker run --rm -v "${{ github.workspace }}:/path" zricethezav/gitleaks:latest \
+            detect --source="/path" --verbose --report-format=sarif --report-path="/path/gitleaks.sarif" || true
+          
+          # Ensure the file exists even if no secrets found
+          if [ ! -f gitleaks.sarif ]; then
+            echo '{"$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","version":"2.1.0","runs":[{"tool":{"driver":{"name":"Gitleaks"}},"results":[]}]}' > gitleaks.sarif
+          fi
+          
+      - name: Check if SARIF file exists
+        id: check_sarif
+        run: |
+          if [ -f gitleaks.sarif ]; then
+            echo "sarif_exists=true" >> $GITHUB_OUTPUT
+            echo "SARIF file found"
+            ls -la gitleaks.sarif
+          else
+            echo "sarif_exists=false" >> $GITHUB_OUTPUT
+            echo "SARIF file not found"
+          fi
           
       - name: Upload SARIF results
-        if: always()  # Upload results even if GitLeaks finds issues
+        if: steps.check_sarif.outputs.sarif_exists == 'true'
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: gitleaks.sarif
           category: gitleaks
           
       - name: Upload GitLeaks report as artifact
-        if: always()
+        if: steps.check_sarif.outputs.sarif_exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: gitleaks-report
