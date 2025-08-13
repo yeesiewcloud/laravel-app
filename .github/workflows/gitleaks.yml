@@ -9,6 +9,14 @@ on:
     # Run daily at 2 AM UTC
     - cron: '0 2 * * *'
 
+permissions:
+  # Required for uploading SARIF results to GitHub Security tab
+  security-events: write
+  # Required for checking out code
+  contents: read
+  # Required for PR comments (optional)
+  pull-requests: write
+
 jobs:
   gitleaks:
     name: Secret Detection
@@ -52,12 +60,46 @@ jobs:
             echo "SARIF file not found"
           fi
           
-      - name: Upload SARIF results
-        if: steps.check_sarif.outputs.sarif_exists == 'true'
+      - name: Upload SARIF results to Security tab
+        if: steps.check_sarif.outputs.sarif_exists == 'true' && github.repository_owner != github.actor
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: gitleaks.sarif
           category: gitleaks
+          
+      - name: Comment on PR with results (if SARIF upload fails)
+        if: steps.check_sarif.outputs.sarif_exists == 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const sarifContent = JSON.parse(fs.readFileSync('gitleaks.sarif', 'utf8'));
+              const results = sarifContent.runs[0]?.results || [];
+              
+              if (results.length > 0) {
+                const comment = `## 🔐 GitLeaks Security Scan Results
+                
+                Found ${results.length} potential secret(s) in this PR:
+
+                ${results.map((result, index) => 
+                `**${index + 1}.** ${result.message?.text || 'Potential secret detected'}
+                - File: \`${result.locations?.[0]?.physicalLocation?.artifactLocation?.uri || 'Unknown'}\`
+                - Line: ${result.locations?.[0]?.physicalLocation?.region?.startLine || 'Unknown'}`
+                ).join('\n\n')}
+
+                Please review and remove any actual secrets before merging.`;
+                                
+                                github.rest.issues.createComment({
+                                issue_number: context.issue.number,
+                                owner: context.repo.owner,
+                                repo: context.repo.repo,
+                                body: comment
+                                });
+                            }
+                            } catch (error) {
+                            console.log('Error processing SARIF file:', error);
+                            }
           
       - name: Upload GitLeaks report as artifact
         if: steps.check_sarif.outputs.sarif_exists == 'true'
