@@ -1,0 +1,33 @@
+{
+  "categories": [
+    {
+      "title": "🚀 New Features",
+      "labels": ["feature", "feat", "enhancement"]
+    },
+    {
+      "title": "🐛 Bug Fixes", 
+      "labels": ["fix", "bug", "hotfix", "bugfix"]
+    },
+    {
+      "title": "💥 Breaking Changes",
+      "labels": ["breaking", "breaking-change"]
+    },
+    {
+      "title": "⚙️ Maintenance",
+      "labels": ["chore", "docs", "ci", "refactor"]
+    }
+  ],
+  "template": "## What's Changed\n${{CATEGORIZED_CHANGES}}\n\n**Full Changelog**: ${{UNCATEGORIZED}}\n\n${{PREVIOUS_TAG}} -> ${{CURRENT_TAG}}",
+  "pr_template": "* ${{TITLE}} by @${{AUTHOR}} in ${{URL}}",
+  "empty_template": "No changes",
+  "label_extractor": [
+    {
+      "pattern": "feat(?:\\(.+\\))?!?:",
+      "target": "feature"
+    },
+    {
+      "pattern": "fix(?:\\(.+\\))?!?:",
+      "target": "fix"
+    }
+  ]
+}

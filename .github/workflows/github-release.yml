@@ -19,16 +19,7 @@ jobs:
         id: changelog
         uses: mikepenz/release-changelog-builder-action@v5
         with:
-          configuration: |
-            {
-              "categories": [
-                { "title": "🚀 New Features", "labels": ["feature", "feat"] },
-                { "title": "🐛 Bug Fixes", "labels": ["fix", "bug", "hotfix"] },
-                { "title": "💥 Breaking Changes", "labels": ["breaking"] },
-                { "title": "⚙️ Maintenance", "labels": ["chore", "docs", "ci"] }
-              ],
-              "template": "## What's Changed\n{{- BEGIN_CATEGORIZED_CHANGES}}\n### {{_CATEGORY_TITLE_}}\n{{- EACH_CHANGE}}\n* {{_TITLE_}} by @{{_AUTHOR_}} in {{_PULL_REQUEST_LINK_}}\n{{- END_EACH_CHANGE}}\n{{- END_CATEGORIZED_CHANGES}}\n\n**Full Changelog**: {{_PREVIOUS_TAG_URL_}}...{{_CURRENT_TAG_URL_}}"
-              }
+          configuration: .github/changelog-config.json
         env:
           GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}
 
