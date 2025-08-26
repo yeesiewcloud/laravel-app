@@ -8,12 +8,37 @@ on:
       - 'v*.*.*'   # runs when a version tag like v1.2.3 is pushed
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 🏗️ Build your project and produce artifacts
+      - name: Build project
+        run: |
+          mkdir -p dist
+          echo "hello world" > dist/example.txt   # your build output here
+
+      # ⬆️ Upload artifact so other jobs can use it
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-artifact
+          path: dist/*
+
   release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+            # ⬇️ Download artifact from build job
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: my-artifact
+          path: dist
       # Build the changelog from merged PRs/issues
       - name: Build changelog
         id: changelog
