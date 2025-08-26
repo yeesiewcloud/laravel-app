@@ -32,7 +32,7 @@ jobs:
                 {{- BEGIN_CATEGORIZED_CHANGES}}
                 ### {{_CATEGORY_TITLE_}}
                 {{- EACH_CHANGE}}
-                * {{_SINGLE_LINE_MSG_}} by @{{_AUTHOR_}} in {{_PULL_REQUEST_LINK_}}
+                * {{_TITLE_}} by @{{_AUTHOR_}} in {{_PULL_REQUEST_LINK_}}
                 {{- END_EACH_CHANGE}}
                 {{- END_CATEGORIZED_CHANGES}}
 
