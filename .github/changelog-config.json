@@ -17,7 +17,7 @@
       "labels": ["chore", "docs", "ci", "refactor"]
     }
   ],
-  "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
+  "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>\n\n**Full Changelog**: #{{RELEASE_DIFF}}",
   "pr_template": "* ${{TITLE}} by @${{AUTHOR}} in ${{URL}}",
   "fromTag": "v1.5.0"
 }
