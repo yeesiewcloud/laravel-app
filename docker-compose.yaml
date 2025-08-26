@@ -2,16 +2,12 @@ version: '3.8'
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: app/test
     container_name: laravel-app
     volumes:
       - .:/var/www/html
-    environment:
-      NEW_RELIC_LICENSE_KEY: 
-      NEW_RELIC_APP_NAME: Laravel Docker App
-      NEW_RELIC_DAEMON_ADDRESS: "newrelic-daemon:31339"
+    # environment:
+
     depends_on:
       - mysql
       - newrelic-daemon
@@ -33,6 +29,7 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - newrelic-php
+      - laravel
 
   nginx:
     image: nginx:latest
@@ -55,10 +52,11 @@ services:
       - "31339"
     networks:
       - newrelic-php
-
 volumes:
   db_data:
+  trivy-cache:
 
 networks:
   newrelic-php:
     external: true
+  laravel:
