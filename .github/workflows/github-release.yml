@@ -48,6 +48,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MY_TOKEN }}
 
+      - name: Use Change Log
+        run: echo "${{ steps.changelog.outputs.changelog }}"
       # Publish GitHub Release with the changelog
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
