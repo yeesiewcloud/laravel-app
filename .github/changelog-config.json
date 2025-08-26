@@ -16,5 +16,6 @@
       "title": "⚙️ Maintenance",
       "labels": ["chore", "docs", "ci", "refactor"]
     }
-  ]
+  ],
+  "fromTag": "v1.5.0"
 }
