@@ -34,12 +34,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-            # ⬇️ Download artifact from build job
-      # - name: Download artifact
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: my-artifact
-      #     path: dist
+      # ⬇️ Download artifact from build job
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: my-artifact
+          path: dist
       # Build the changelog from merged PRs/issues
       - name: Build changelog
         id: changelog
