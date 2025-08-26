@@ -1,6 +1,8 @@
 name: Release
 
 on:
+  workflow_dispatch:   # manual trigger from Actions tab
+  pull_request:        # optional, builds changelog when PRs are opened/merged
   push:
     tags:
       - 'v*.*.*'   # runs when a version tag like v1.2.3 is pushed
